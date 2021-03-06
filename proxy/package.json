@@ -5,6 +5,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
+    "bundler": "node ./s3_utils/bundler.js",
+    "upload-bundled": "node ./s3_utils/s3_upload.js bundles-of-joy ./public/bundles.js",
     "build": "webpack",
     "upload": "node ./s3_utils/s3_upload.js bundles-of-joy ./public/bundles.js"
   },
@@ -23,6 +25,7 @@
     "axios": "^0.21.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
+    "newrelic": "^7.1.2",
     "nodemon": "^2.0.6",
     "path": "^0.12.7",
     "react": "^17.0.1",
@@ -36,6 +39,8 @@
     "@babel/preset-react": "^7.12.10",
     "babel-loader": "^8.2.2",
     "css-loader": "^5.0.1",
-    "style-loader": "^2.0.0"
+    "style-loader": "^2.0.0",
+    "webpack": "^5.24.2",
+    "webpack-cli": "^4.5.0"
   }
 }
