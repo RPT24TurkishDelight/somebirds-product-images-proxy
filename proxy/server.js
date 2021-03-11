@@ -1,16 +1,17 @@
-require('newrelic')
+//require('newrelic')
 const express = require('express');
 const path = require('path');
 const axios = require('axios');
 const port = 3000;
 const app = express();
 //change to local host if desired for environment 'http://localhost:3001' 'http://localhost:3002'
-// const sizeColorServicePath = 'http://3.18.69.132:3001';
-// const productServicePath = 'http://54.241.116.3:3002';
-// const galleryServicePath = 'http://54.241.116.3:3004';
-const galleryServicePath = 'http://localhost:3004';
-// const feedbackServicePath = 'http://3.18.69.132:3003'
+const sizeColorServicePath = 'http://3.141.97.133:3001';
+const productServicePath = 'http://184.169.234.6:3002';
+const galleryServicePath = 'http://54.215.52.230:3004';
+// const galleryServicePath = 'http://localhost:3004';
+const feedbackServicePath = 'http://52.9.33.58:3003';
 
+app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 
 // ####################################
@@ -35,6 +36,26 @@ app.get('/products/:productId/summary', (req, res) => {
 });
 
 // Re-routing get request from image gallery service
+
+app.post('/products/:productId/gallery', (req, res) => {
+  let id = req.params.productId;
+  let imgUrl = req.body.imgUrl;
+
+  axios({
+    method: 'post',
+    url: `${galleryServicePath}/products/${id}/gallery`,
+    data: {imgUrl: imgUrl}
+  })
+  .then((response) => {
+    res.send(response.data);
+  })
+  .catch((err) => {
+    console.error(err);
+    res.send([]);
+  });
+
+});
+
 app.get('/products/:productId/gallery', (req, res) => {
   let id = req.params.productId;
 
