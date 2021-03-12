@@ -2,17 +2,26 @@
 const express = require('express');
 const path = require('path');
 const axios = require('axios');
+consr redis = require('redis');
 const port = 3000;
 const app = express();
 //change to local host if desired for environment 'http://localhost:3001' 'http://localhost:3002'
 const sizeColorServicePath = 'http://3.141.97.133:3001';
-const productServicePath = 'http://13.57.48.234:3002';
+const productServicePath = 'http://13.57.48.234';
 const galleryServicePath = 'http://54.215.52.230:3004';
 // const galleryServicePath = 'http://localhost:3004';
 const feedbackServicePath = 'http://52.9.33.58:3003';
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Connect to the Redis server
+const redisPort = 6379;
+const client = redis.createClient(redisPort);
+
+client.on('error', err => {
+  console.error(err);
+})
 
 // ####################################
 // Rerouting requests from each service
@@ -59,17 +68,43 @@ app.post('/products/:productId/gallery', (req, res) => {
 app.get('/products/:productId/gallery', (req, res) => {
   let id = req.params.productId;
 
-  axios({
-    method: 'get',
-    url: `${galleryServicePath}/products/${id}/gallery`
-  })
-  .then((response) => {
-    res.send(response.data);
-  })
-  .catch((err) => {
+  try {
+    client.get(id, (err, resp) => {
+      if (err) throw err;
+
+      if (resp) {
+        res.send(resp.data);
+      } else {
+        axios({
+          method: 'get',
+          url: `${galleryServicePath}/products/${id}/gallery`
+        })
+        .then((response) => {
+          client.setex(id, 1200, JSON.stringify(response.data));
+          res.send(response.data);
+        })
+        .catch((err) => {
+          console.error(err);
+          res.send([]);
+        });
+      }
+    })
+  } catch (err) {
     console.error(err);
     res.send([]);
-  });
+  }
+
+  // axios({
+  //   method: 'get',
+  //   url: `${galleryServicePath}/products/${id}/gallery`
+  // })
+  // .then((response) => {
+  //   res.send(response.data);
+  // })
+  // .catch((err) => {
+  //   console.error(err);
+  //   res.send([]);
+  // });
 
 });
 
